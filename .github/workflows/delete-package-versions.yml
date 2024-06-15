@@ -1,0 +1,20 @@
+name: Delete Package Versions
+
+on:
+  schedule:
+      - cron: "0 0 * * 0" # Run every Sunday at midnight UTC
+  push:
+    branches:
+      - main
+
+jobs:
+  delete-package-versions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete package versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'encodingtools'
+          package-type: 'container'
+          min-versions-to-keep: 20

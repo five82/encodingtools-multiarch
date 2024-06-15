@@ -1,5 +1,5 @@
 # encodingtools-multiarch
-Encoding tools for ghcr.io/five82/encodingwf.\
+Encoding tools for ghcr.io/five82/encodingwf \
 Docker images available for amd64 and arm64.
 
 `docker pull ghcr.io/five82/encodingtools-multiarch`
