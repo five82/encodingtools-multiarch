@@ -15,6 +15,6 @@ jobs:
       - name: Delete package versions
         uses: actions/delete-package-versions@v5
         with:
-          package-name: 'encodingtools'
+          package-name: 'encodingtools-multiarch'
           package-type: 'container'
           min-versions-to-keep: 20
