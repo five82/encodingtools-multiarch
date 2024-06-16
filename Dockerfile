@@ -41,7 +41,7 @@ RUN apt-get update && \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 # Install cargo-c
-RUN /root/.cargo/bin/cargo install cargo-c
+RUN /root/.cargo/bin/cargo install cargo-c --jobs $(nproc)
 
 # Build libopus git
 RUN git clone https://gitlab.xiph.org/xiph/opus.git && \
@@ -71,14 +71,16 @@ RUN git clone https://github.com/quietvoid/hdr10plus_tool.git && \
     cd /build/hdr10plus_tool/hdr10plus && \
     /root/.cargo/bin/cargo cinstall \
         --release \
-        --prefix=/usr/local
+        --prefix=/usr/local \
+        --jobs $(nproc)
 
 # Build libdovi git
 RUN git clone https://github.com/quietvoid/dovi_tool.git && \
     cd /build/dovi_tool/dolby_vision && \
     /root/.cargo/bin/cargo cinstall \
         --release \
-        --prefix=/usr/local
+        --prefix=/usr/local\
+        --jobs $(nproc)
 
 # Build svt-av1-psy git
 RUN git clone https://github.com/gianni-rosato/svt-av1-psy.git && \
@@ -114,14 +116,19 @@ RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
         --enable-libsvtav1 \
         --enable-gpl \
         --enable-version3 \
-        --disable-doc && \
+        --disable-doc \
+        --disable-debug \
+        --disable-ffplay \
+        --disable-static \
+        --enable-shared && \
     make -j$(nproc) && \
     make install
 
 # Build ab-av1 git
 RUN /root/.cargo/bin/cargo install \
         --git https://github.com/alexheretic/ab-av1 \
-        --root /usr/local
+        --root /usr/local \
+        --jobs $(nproc)
 
 # Use debian:stable-slim for our base runtime image
 FROM docker.io/debian:stable-slim as runtime
