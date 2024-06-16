@@ -12,6 +12,7 @@ ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
 # Update and install build packages
 RUN apt-get update && \
     apt-get install -y \
+        --no-install-recommends \
         autoconf \
         automake \
         build-essential \
