@@ -35,27 +35,26 @@ RUN apt-get update && \
         yasm \
         libssl-dev \
         clang \
-        zlib1g-dev && \
-    # Clone repos
-    git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
-    git clone https://github.com/xiph/opus.git && \
-    git clone https://github.com/Netflix/vmaf.git && \
-    git clone https://github.com/quietvoid/hdr10plus_tool.git && \
-    git clone https://github.com/quietvoid/dovi_tool.git && \
-    git clone https://github.com/gianni-rosato/svt-av1-psy.git && \
-    # Install rustup
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    # Install cargo-c
-    /root/.cargo/bin/cargo install cargo-c && \
-    # Build libopus git
+        zlib1g-dev
+
+# Install rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Install cargo-c
+RUN /root/.cargo/bin/cargo install cargo-c
+
+# Build libopus git
+RUN git clone https://gitlab.xiph.org/xiph/opus.git && \
     cd /build/opus && \
     autoreconf -fiv && \
     ./configure \
         --prefix=/usr/local \
         --enable-shared && \
     make -j$(nproc) && \
-    make install && \
-    # Build libvmaf git
+    make install
+
+# Build libvmaf git
+RUN git clone https://github.com/Netflix/vmaf.git && \
     cd /build/vmaf/libvmaf && \
     meson setup build \
         --buildtype release \
@@ -65,18 +64,24 @@ RUN apt-get update && \
         -Denable_tests=false \
         -Denable_docs=false && \
     ninja -C build && \
-    ninja -C build install && \
-    # Build libhdr10plus git
+    ninja -C build install
+
+# Build libhdr10plus git
+RUN git clone https://github.com/quietvoid/hdr10plus_tool.git && \
     cd /build/hdr10plus_tool/hdr10plus && \
     /root/.cargo/bin/cargo cinstall \
         --release \
-        --prefix=/usr/local && \
-    # Build libdovi git
+        --prefix=/usr/local
+
+# Build libdovi git
+RUN git clone https://github.com/quietvoid/dovi_tool.git && \
     cd /build/dovi_tool/dolby_vision && \
     /root/.cargo/bin/cargo cinstall \
         --release \
-        --prefix=/usr/local && \
-    # Build svt-av1-psy git
+        --prefix=/usr/local
+
+# Build svt-av1-psy git
+RUN git clone https://github.com/gianni-rosato/svt-av1-psy.git && \
     cd /build/svt-av1-psy/Build && \
     export CC=clang \
         CXX=clang++ && \
@@ -94,8 +99,10 @@ RUN apt-get update && \
         -DLIBHDR10PLUS_RS_FOUND=1 \
         -DLIBDOVI_FOUND=1 && \
     make -j $(nproc) && \
-    make install && \
-    # Build ffmpeg git
+    make install
+
+# Build ffmpeg git
+RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
     cd /build/FFmpeg && \
     ./configure \
         --prefix=/usr/local \
@@ -109,9 +116,10 @@ RUN apt-get update && \
         --enable-version3 \
         --disable-doc && \
     make -j$(nproc) && \
-    make install && \
-    # Build ab-av1 git
-    /root/.cargo/bin/cargo install \
+    make install
+
+# Build ab-av1 git
+RUN /root/.cargo/bin/cargo install \
         --git https://github.com/alexheretic/ab-av1 \
         --root /usr/local
 
