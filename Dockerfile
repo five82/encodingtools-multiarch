@@ -1,7 +1,7 @@
 # encodingtools-multiarch
 
-# Use debian:stable-slim for our base build image
-FROM docker.io/debian:stable-slim as build
+# Use five82/buildtools:latest for our base build image
+FROM ghcr.io/five82/buildtools:latest as build
 
 # Set the working directory to /build
 WORKDIR /build
@@ -12,11 +12,6 @@ ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
 # Update and install build packages
 RUN apt-get update && \
     apt-get install -y \
-        autoconf \
-        automake \
-        build-essential \
-        cmake \
-        git-core \
         libass-dev \
         libfreetype6-dev \
         libgnutls28-dev \
@@ -25,23 +20,7 @@ RUN apt-get update && \
         libva-dev \
         libxcb1-dev \
         libxcb-shm0-dev \
-        libxcb-xfixes0-dev \
-        meson \
-        nasm \
-        ninja-build \
-        pkg-config \
-        texinfo \
-        curl \
-        yasm \
-        libssl-dev \
-        clang \
-        zlib1g-dev
-
-# Install rustup
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-# Install cargo-c
-RUN /root/.cargo/bin/cargo install cargo-c --jobs $(nproc)
+        libxcb-xfixes0-dev
 
 # Build libopus git
 RUN git clone https://gitlab.xiph.org/xiph/opus.git && \
