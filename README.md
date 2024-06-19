@@ -6,6 +6,6 @@ Docker images available for amd64 and arm64.
 
 ab-av1 git \
 libopus git \
-vmaf git \
+vmaf 3.0.0 \
 svt-av1-psy git (with hdr10+ and dolby vision support) \
 ffmpeg git

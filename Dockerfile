@@ -32,9 +32,10 @@ RUN git clone https://gitlab.xiph.org/xiph/opus.git && \
     make -j$(nproc) && \
     make install
 
-# Build libvmaf git
+# Build libvmaf 3.0.0
 RUN git clone https://github.com/Netflix/vmaf.git && \
     cd /build/vmaf/libvmaf && \
+    git checkout v3.0.0 && \
     meson setup build \
         --buildtype release \
         --default-library=shared \
