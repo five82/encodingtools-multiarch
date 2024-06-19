@@ -55,7 +55,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Check cache age and delete if older than 60 hours
+      - name: Delete buildx cache if older than 60 hours
         run: |
           CACHE_DIR=/tmp/.buildx-cache
           TIMESTAMP_FILE=$CACHE_DIR/timestamp
