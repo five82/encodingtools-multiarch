@@ -7,7 +7,7 @@ name: Docker
 
 on:
   schedule:
-    - cron: '0 5 */8 * *' # Run every eight days at 5:00 UTC
+    - cron: '0 5 */3 * *' # Run every three days at 5:00 UTC
   push:
     branches: [ "main" ]
   pull_request:
@@ -54,6 +54,30 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
+      - name: Check cache age and delete if older than 60 hours
+        run: |
+          CACHE_DIR=/tmp/.buildx-cache
+          TIMESTAMP_FILE=$CACHE_DIR/timestamp
+          CURRENT_TIME=$(date +%s)
+          MAX_AGE=$((60 * 60 * 60)) # 60 hours in seconds
+          if [[ -f "$TIMESTAMP_FILE" ]]; then
+            CACHE_TIME=$(cat $TIMESTAMP_FILE)
+            AGE=$(($CURRENT_TIME - $CACHE_TIME))
+            if [[ "$AGE" -gt "$MAX_AGE" ]]; then
+              echo "Cache is older than 60 hours, deleting..."
+              rm -rf $CACHE_DIR
+              # Re-create cache directory and timestamp file
+              mkdir -p $CACHE_DIR
+              date +%s > $TIMESTAMP_FILE
+            else
+              echo "Cache is within age limit, not deleting."
+            fi
+          else
+            echo "Timestamp file does not exist, creating one..."
+            mkdir -p $CACHE_DIR
+            date +%s > $TIMESTAMP_FILE
+          fi
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
