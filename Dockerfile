@@ -20,7 +20,8 @@ RUN apt-get update && \
         libva-dev \
         libxcb1-dev \
         libxcb-shm0-dev \
-        libxcb-xfixes0-dev
+        libxcb-xfixes0-dev \
+        xxd
 
 # Build libopus git
 RUN git clone https://gitlab.xiph.org/xiph/opus.git && \
@@ -32,10 +33,9 @@ RUN git clone https://gitlab.xiph.org/xiph/opus.git && \
     make -j$(nproc) && \
     make install
 
-# Build libvmaf 3.0.0
+# Build libvmaf git
 RUN git clone https://github.com/Netflix/vmaf.git && \
     cd /build/vmaf/libvmaf && \
-    git checkout v3.0.0 && \
     meson setup build \
         --buildtype release \
         --default-library=shared \
