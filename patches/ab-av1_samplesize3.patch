@@ -1,0 +1,13 @@
+diff --git a/src/main.rs b/src/main.rs
+index 083cb68..05fee01 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -14,7 +14,7 @@ use futures::FutureExt;
+ use std::time::Duration;
+ use tokio::signal;
+ 
+-const SAMPLE_SIZE_S: u64 = 20;
++const SAMPLE_SIZE_S: u64 = 3;
+ const SAMPLE_SIZE: Duration = Duration::from_secs(SAMPLE_SIZE_S);
+ 
+ #[derive(Parser)]

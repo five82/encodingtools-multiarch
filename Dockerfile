@@ -6,6 +6,9 @@ FROM ghcr.io/five82/buildtools:latest as build
 # Set the working directory to /build
 WORKDIR /build
 
+# Copy the patches directory
+COPY patches /build/patches
+
 # Add /usr/local/lib to the library path
 ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
 
@@ -121,8 +124,12 @@ RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
     make install
 
 # Build ab-av1 git
-RUN /root/.cargo/bin/cargo install \
-        --git https://github.com/alexheretic/ab-av1 \
+RUN git clone https://github.com/alexheretic/ab-av1.git && \
+    cd ab-av1 && \
+    # Changes the default vmaf sample size from 20 to 3 seconds
+    git apply /build/patches/ab-av1_samplesize3.patch && \
+    /root/.cargo/bin/cargo install \
+        --path /build/ab-av1 \
         --root /usr/local \
         --jobs $(nproc)
 
