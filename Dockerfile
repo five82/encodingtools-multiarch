@@ -83,6 +83,21 @@ RUN git clone https://github.com/gianni-rosato/svt-av1-psy.git && \
     make -j $(nproc) && \
     make install
 
+# Build libdav1d git
+RUN git clone --depth=1 https://code.videolan.org/videolan/dav1d.git && \
+    cd /build/dav1d && \
+    meson setup build \
+        --buildtype release \
+        --default-library=shared \
+        --prefix=/usr/local \
+        --bindir="/usr/local/bin" \
+        --libdir="/usr/local/lib" \
+        -Denable_tools=false \
+        -Denable_tests=false \
+        -Denable_asm=true && \
+    ninja -C build && \
+    ninja -C build install
+
 # Build ffmpeg git
 RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
     cd /build/FFmpeg && \
@@ -90,6 +105,7 @@ RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
         --prefix=/usr/local \
         --enable-gpl \
         --enable-libass \
+        --enable-libdav1d \
         --enable-libfreetype \
         --enable-libopus \
         --enable-libvmaf \
