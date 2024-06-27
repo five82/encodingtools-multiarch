@@ -10,7 +10,8 @@ WORKDIR /build
 COPY patches /build/patches
 
 # Add /usr/local/lib to the library path
-ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
+ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib \
+    PATH="/root/.local/pipx/bin:$PATH"
 
 # Update and install build packages
 RUN apt-get update && \
@@ -24,6 +25,7 @@ RUN apt-get update && \
         libxcb1-dev \
         libxcb-shm0-dev \
         libxcb-xfixes0-dev \
+        pipx \
         xxd
 
 # Build libopus git
@@ -123,15 +125,8 @@ RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
     make -j$(nproc) && \
     make install
 
-# Build ab-av1 git
-RUN git clone https://github.com/alexheretic/ab-av1.git && \
-    cd ab-av1 && \
-    # Changes the default vmaf sample size from 20 to 3 seconds
-    git apply /build/patches/ab-av1_samplesize3.patch && \
-    /root/.cargo/bin/cargo install \
-        --path /build/ab-av1 \
-        --root /usr/local \
-        --jobs $(nproc)
+# Install alabamaencoder
+RUN pipx install alabamaencoder
 
 # Use debian:stable-slim for our base runtime image
 FROM docker.io/debian:stable-slim as runtime
@@ -142,6 +137,7 @@ WORKDIR /app
 # # Copy from build container
 COPY --from=build /usr/local/bin /usr/local/bin
 COPY --from=build /usr/local/lib /usr/local/lib
+COPY --from=build /root/.local/pipx /root/.local/pipx
 
 # Install runtime dependencies
 RUN apt-get update && \
@@ -160,8 +156,12 @@ RUN apt-get update && \
         libxv1 \
         libva2 \
         libva-drm2 \
-        libva-x11-2 && \
+        libva-x11-2 \
+        python3 \
+        libgl1 && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    # Create a symlink to alabamaencoder
+    ln -s /root/.local/pipx/venvs/alabamaencoder/bin/alabamaEncoder /usr/local/bin/alabamaencoder
 
-CMD ["/usr/local/bin/ab-av1"]
+CMD ["/usr/local/bin/alabamaencoder"]
