@@ -10,8 +10,7 @@ WORKDIR /build
 COPY patches /build/patches
 
 # Add /usr/local/lib to the library path
-ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib \
-    PATH="/root/.local/pipx/bin:$PATH"
+ENV LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
 
 # Update and install build packages
 RUN apt-get update && \
