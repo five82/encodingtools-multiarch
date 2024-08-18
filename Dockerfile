@@ -1,10 +1,13 @@
 # encodingtools-multiarch
 
 # Use five82/buildtools:latest for our base build image
-FROM ghcr.io/five82/buildtools:latest as build
+FROM ghcr.io/five82/buildtools:latest AS build
 
 # Set the working directory to /build
 WORKDIR /build
+
+# Use bash for our shell
+SHELL ["/bin/bash", "-c"]
 
 # Copy the patches directory
 COPY patches /build/patches
@@ -24,6 +27,7 @@ RUN apt-get update && \
         libxcb1-dev \
         libxcb-shm0-dev \
         libxcb-xfixes0-dev \
+        python3 \
         pipx \
         xxd
 
@@ -58,9 +62,15 @@ RUN git clone https://github.com/quietvoid/hdr10plus_tool.git && \
         --prefix=/usr/local \
         --jobs $(nproc)
 
-# Build libdovi git
+# Build dovi_tool git
 RUN git clone https://github.com/quietvoid/dovi_tool.git && \
-    cd /build/dovi_tool/dolby_vision && \
+    /root/.cargo/bin/cargo install \
+        --path=/build/dovi_tool \
+        --root=/usr/local \
+        --jobs $(nproc)
+
+# Build libdovi git
+RUN cd /build/dovi_tool/dolby_vision && \
     /root/.cargo/bin/cargo cinstall \
         --release \
         --prefix=/usr/local\
@@ -124,25 +134,25 @@ RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git && \
     make -j$(nproc) && \
     make install
 
-# Install alabamaencoder
-RUN pipx install alabamaencoder
 
-# Use debian:stable-slim for our base runtime image
-FROM docker.io/debian:stable-slim as runtime
+# Use ubuntu:latest for our base runtime image
+FROM docker.io/ubuntu:latest AS runtime
 
 # # Set the working directory to /app
 WORKDIR /app
 
+# Use bash for our shell
+SHELL ["/bin/bash", "-c"]
+
 # # Copy from build container
 COPY --from=build /usr/local/bin /usr/local/bin
 COPY --from=build /usr/local/lib /usr/local/lib
-COPY --from=build /root/.local/pipx /root/.local/pipx
 
 # Install runtime dependencies
 RUN apt-get update && \
     apt-get install -y \
         --no-install-recommends \
-        libasound2 \
+        libasound2t64 \
         libass9 \
         libfreetype6 \
         libdrm2 \
@@ -157,10 +167,23 @@ RUN apt-get update && \
         libva-drm2 \
         libva-x11-2 \
         python3 \
+        git-core \
+        pipx \
+        butteraugli \
         libgl1 && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    # Create a symlink to alabamaencoder
-    ln -s /root/.local/pipx/venvs/alabamaencoder/bin/alabamaEncoder /usr/local/bin/alabamaencoder
+    rm -rf /var/lib/apt/lists/*
 
-CMD ["/usr/local/bin/alabamaencoder"]
+# Build alabamaencoder
+RUN git clone https://github.com/kingstefan26/alabamaEncoder && \
+        cd /app/alabamaEncoder && \
+        python3 -m venv venv && \
+        source venv/bin/activate && \
+        pip install -r requirements.txt && \
+        pip install build && \
+        python3 -m build && \
+        pipx install . --editable --force && \
+        # Create a symlink to alabamaencoder
+        ln -s /root/.local/share/pipx/venvs/alabamaencoder/bin/alabamaEncoder /usr/local/bin/alabamaEncoder
+
+CMD ["/usr/local/bin/alabamaEncoder"]
