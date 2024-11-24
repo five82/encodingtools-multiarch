@@ -62,6 +62,12 @@ RUN git clone https://github.com/quietvoid/dovi_tool.git && \
     --prefix=/usr/local\
     --jobs $(nproc)
 
+# Build dovi_tool git
+RUN /root/.cargo/bin/cargo install \
+    --path=/build/dovi_tool \
+    --root=/usr/local \
+    --jobs $(nproc)
+
 # Build svt-av1-psy git
 RUN git clone https://github.com/gianni-rosato/svt-av1-psy.git && \
     cd /build/svt-av1-psy/Build && \
