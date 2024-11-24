@@ -153,7 +153,8 @@ RUN apt-get update && \
     libxv1 \
     libva2 \
     libva-drm2 \
-    libva-x11-2 && \
+    libva-x11-2 \
+    mediainfo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
