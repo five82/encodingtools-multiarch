@@ -160,7 +160,10 @@ RUN apt-get update && \
     libva2 \
     libva-drm2 \
     libva-x11-2 \
-    mediainfo && \
+    mediainfo \
+    python3 \
+    python3-pip \
+    python3-venv && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
